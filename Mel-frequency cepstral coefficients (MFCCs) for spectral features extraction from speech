@@ -1,0 +1,30 @@
+def mfcc(signal, sample_rate, n_mfcc=13, n_mels=20):
+  """
+  Calculates the Mel-frequency cepstral coefficients (MFCCs) from a speech signal.
+
+  Args:
+    signal: The speech signal.
+    sample_rate: The sample rate of the speech signal.
+    n_mfcc: The number of MFCCs to calculate.
+    n_mels: The number of mel-frequency bands.
+
+  Returns:
+    The MFCCs.
+  """
+
+  # Convert the speech signal to the frequency domain using the Fast Fourier Transform (FFT).
+  fft_coefficients = np.fft.fft(signal)
+
+  # Apply a Hamming window to the FFT coefficients to reduce spectral leakage.
+  windowed_coefficients = fft_coefficients * np.hamming(len(fft_coefficients))
+
+  # Calculate the mel-frequency bands.
+  mel_bands = librosa.melspectrogram(y=signal, sr=sample_rate, n_mels=n_mels)
+
+  # Calculate the energy of each mel-frequency band.
+  energy_bands = np.log(mel_bands + 1e-8)
+
+  # Apply a Discrete Cosine Transform (DCT) to the log-energy coefficients.
+  mfccs = np.dct(energy_bands, axis=1, norm='ortho')[:, 1:(n_mfcc + 1)]
+
+  return mfccs
